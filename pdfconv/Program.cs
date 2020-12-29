@@ -28,7 +28,7 @@ namespace pdfconv
         [Value(0, MetaName = "target_pdf", Required = true, HelpText = "PDF file name to convert")]
         public string fileName { get; set; }
 
-        [Option('o', "outdir", Default = ".\\", HelpText = "base irectory to save image")]
+        [Option('o', "outdir", Default = ".\\", HelpText = "base directory to save image")]
         public string OutputDir { get; set; }
 
         [Option('f', "force",
