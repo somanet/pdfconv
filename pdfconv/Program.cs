@@ -11,19 +11,6 @@ namespace pdfconv
 {
     class Options
     {
-        //[Option('r', "read", Required = true, HelpText = "Input files to be processed.")]
-        //public IEnumerable<string> InputFiles { get; set; }
-
-        //// Omitting long name, defaults to name of property, ie "--verbose"
-        //[Option(
-        //  Default = false,
-        //  HelpText = "Prints all messages to standard output.")]
-        //public bool Verbose { get; set; }
-
-        //[Option("stdin",
-        //  Default = false,
-        //  HelpText = "Read from stdin")]
-        //public bool stdin { get; set; }
 
         [Value(0, MetaName = "target_pdf", Required = true, HelpText = "PDF file name to convert")]
         public string fileName { get; set; }
@@ -36,6 +23,10 @@ namespace pdfconv
           HelpText = "Overwrite image, if exists")]
         public bool OverwriteImage { get; set; }
 
+        [Option('d', "dpi",
+          Default = 300f,
+          HelpText = "Image dpi")]
+        public float Dpi{ get; set; }
     }
 
     class Program
@@ -68,7 +59,7 @@ namespace pdfconv
 
                     Directory.CreateDirectory(outputPath);
 
-                    doc.SaveToImages( outputPath, ImageFormat.Jpeg, opts.OverwriteImage );
+                    doc.SaveToImages( outputPath, ImageFormat.Jpeg, opts.OverwriteImage, opts.Dpi );
                 }
                 catch(Exception e)
                 {

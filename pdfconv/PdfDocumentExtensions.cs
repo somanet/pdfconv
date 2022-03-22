@@ -9,38 +9,59 @@ namespace pdfconv
 {
     public static class PdfDocumentExtensions
     {
-        public static void SaveToImages(this PdfDocument document, string outputPath, ImageFormat imageFormat, bool overwriteImage = true)
+        /// <summary>
+        /// 자릿수(place value)구하기
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        private static uint GetPlaceValue(uint number)
+        {
+            uint power = 1;
+            uint placeVal = 0;
+            while (true)
+            {
+                if (number / Math.Pow(10, power) < 1)
+                {
+                    placeVal = power;
+                    break;
+                }
+
+                power++;
+            }
+
+            return placeVal;
+        }
+        public static void SaveToImages(this PdfDocument document, string outputPath, ImageFormat imageFormat, bool overwriteImage, float dpi = 300f)
         {
             var extension = imageFormat.ToString().ToLower();
             int skipCount = 0;
 
-            var dpi = GetSystemDpi();
-
-            for(var i=0; i< document.PageCount; i++)
+            for(var pageIdx=0; pageIdx< document.PageCount; pageIdx++)
             {
-                var imgFileName = Path.Combine(outputPath, $"{i}.{extension}");
+                var imgFileName = Path.Combine(outputPath, $"{(pageIdx+1).ToString($"D{GetPlaceValue((uint)document.PageCount)}")}.{extension}");
 
                 if ( File.Exists(imgFileName) &&  !overwriteImage)
                 {
                     skipCount++;
 
-                    ColorConsole.WriteLine($"Skip extraction. {imgFileName} exists.", ConsoleColor.Yellow);
+                    ColorConsole.WriteLine($"Skip converting. {imgFileName} exists.", ConsoleColor.Yellow);
                     continue;
                 }
 
-                var pageSize = document.PageSizes[i];
+                var pageSize = document.PageSizes[pageIdx];
 
-                var image = document.Render(i,
-                    PointToPixel(pageSize.Width, dpi.Width)*2,
-                    PointToPixel(pageSize.Height, dpi.Height)*2, 
-                    200,
-                    200,  
-                    false);
+                var image = document.Render(
+                    pageIdx,
+                    (int)Math.Round(PointToPixel(pageSize.Width, dpi)),
+                    (int)Math.Round(PointToPixel(pageSize.Height, dpi)),
+                    dpi,
+                    dpi,
+                    true);
 
 
                 image.Save(imgFileName,imageFormat);
 
-                ColorConsole.WriteLine($"extract {i+1}/{document.PageCount} page to {imgFileName}", ConsoleColor.White);
+                ColorConsole.WriteLine($"converted {pageIdx+1}/{document.PageCount} page into {imgFileName}", ConsoleColor.White);
             }
 
 
@@ -60,9 +81,9 @@ namespace pdfconv
                 return new SizeF(graphics.DpiX, graphics.DpiY);
         }
 
-        private static int PointToPixel(float pointValue, float dpi)
+        private static float PointToPixel(float pointValue, float dpi)
         {
-            return (int)Math.Round(pointValue * dpi / 72);
+            return (float)Math.Round(pointValue * dpi / 72);
         }
 
     }
