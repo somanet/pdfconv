@@ -50,29 +50,24 @@ namespace pdfconv
 
                 var pageSize = document.PageSizes[pageIdx];
 
-                var image = document.Render(
-                    pageIdx,
+                 
+                using (var image = document.Render( pageIdx, 
                     (int)Math.Round(PointToPixel(pageSize.Width, dpi)),
-                    (int)Math.Round(PointToPixel(pageSize.Height, dpi)),
-                    dpi,
-                    dpi,
-                    true);
+                    (int)Math.Round(PointToPixel(pageSize.Height, dpi)), dpi, dpi, true))
+                {
+                    image.Save(imgFileName, imageFormat);
+                }
 
+                var percentage = (int)Math.Floor(((pageIdx + 1) / (double)document.PageCount) * 100);
 
-                image.Save(imgFileName,imageFormat);
-
-                ColorConsole.WriteLine($"converted {pageIdx+1}/{document.PageCount} page into {imgFileName}", ConsoleColor.White);
+                ColorConsole.WriteLine($"[{percentage}%] Extracted {pageIdx} ({pageIdx+1}/{document.PageCount}) page into {imgFileName}", ConsoleColor.White);
             }
 
 
             if(skipCount > 0)
-            {
                 ColorConsole.WriteLine($"\nExtracted {document.PageCount-skipCount} page(s). Skipped {skipCount} page(s)", ConsoleColor.Green);
-            }
             else
-            {
                 ColorConsole.WriteLine($"\nExtracted {document.PageCount} page(s).", ConsoleColor.Green);
-            }
         }
 
         private static SizeF GetSystemDpi()
